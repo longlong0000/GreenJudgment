@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>캐릭터 카드 에디터</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        #cardCanvas {
+            width: 1200px; height: 500px;
+            position: relative; overflow: hidden;
+            background-color: #000000;
+            background-image: url('bg.png'); 
+            background-size: cover; 
+            background-position: center;
+            border: none;
+        }
+        #charPreview {
+            position: absolute;
+            left: 0; top: 0;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="p-10 bg-gray-900">
+    <div class="max-w-6xl mx-auto flex flex-col items-center gap-8">
+        
+        <!-- 카드 프리뷰 -->
+        <div id="cardCanvas" class="shadow-2xl">
+            <img id="charPreview" src="" style="width: 300px; transform: translate(0px, 0px);">
+            
+            <div style="position: absolute; left: 140px; top: 100px; z-index: 20; color: white;">
+                <h1 id="displayName" class="text-7xl font-black italic">이름</h1>
+            </div>
+
+            <div style="position: absolute; left: 155px; top: 220px; z-index: 20; color: white; font-size: 1.5rem; font-weight: bold;">
+                <span id="displayAge">-</span>세 / <span id="displayHeight">-</span>cm / <span id="displayAffiliation">-</span>
+            </div>
+        </div>
+
+        <!-- 설정창 -->
+        <div class="w-[1200px] bg-white p-8 rounded-lg grid grid-cols-4 gap-6">
+            <div class="col-span-2 grid grid-cols-2 gap-4">
+                <input type="text" id="nameInput" placeholder="이름" class="p-3 border">
+                <input type="text" id="ageInput" placeholder="나이" class="p-3 border">
+                <input type="text" id="heightInput" placeholder="키" class="p-3 border">
+                <input type="text" id="affiliationInput" placeholder="소속" class="p-3 border">
+                <input type="file" id="charInput" class="col-span-2 p-2 border">
+            </div>
+            
+            <div class="col-span-2 grid grid-cols-1 gap-2">
+                <label>가로 위치: <input type="range" id="xRange" min="-500" max="1200" value="0" class="w-full"></label>
+                <label>세로 위치: <input type="range" id="yRange" min="-500" max="1000" value="0" class="w-full"></label>
+                <label>크기 조절: <input type="range" id="sizeRange" min="50" max="1000" value="300" class="w-full"></label>
+            </div>
+
+            <div class="col-span-4 flex justify-center">
+                <button onclick="downloadCard()" class="bg-black text-white px-10 py-3 font-bold w-full">이미지 저장하기</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const charImg = document.getElementById('charPreview');
+
+        document.getElementById('xRange').addEventListener('input', () => updateTransform());
+        document.getElementById('yRange').addEventListener('input', () => updateTransform());
+        document.getElementById('sizeRange').addEventListener('input', (e) => charImg.style.width = e.target.value + 'px');
+
+        function updateTransform() {
+            const x = document.getElementById('xRange').value;
+            const y = document.getElementById('yRange').value;
+            charImg.style.transform = `translate(${x}px, ${y}px)`;
+        }
+
+        document.getElementById('nameInput').addEventListener('input', (e) => document.getElementById('displayName').innerText = e.target.value || '이름');
+        document.getElementById('ageInput').addEventListener('input', (e) => document.getElementById('displayAge').innerText = e.target.value || '-');
+        document.getElementById('heightInput').addEventListener('input', (e) => document.getElementById('displayHeight').innerText = e.target.value || '-');
+        document.getElementById('affiliationInput').addEventListener('input', (e) => document.getElementById('displayAffiliation').innerText = e.target.value || '-');
+        
+        document.getElementById('charInput').addEventListener('change', (e) => {
+            const reader = new FileReader();
+            reader.onload = (event) => charImg.src = event.target.result;
+            reader.readAsDataURL(e.target.files[0]);
+        });
+
+        function downloadCard() {
+            html2canvas(document.getElementById('cardCanvas'), { useCORS: true }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'my-character-card.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>
